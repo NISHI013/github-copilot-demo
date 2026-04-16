@@ -1,0 +1,44 @@
+# 親ディレクトリを除外
+../
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+dist/
+*.o
+*.a
+*.so
+*.dylib
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Qt
+.qmake.stash
+*.pro.user
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Dependencies
+node_modules/
+venv/
+env/

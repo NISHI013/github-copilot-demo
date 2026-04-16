@@ -1,0 +1,111 @@
+{
+  "$schema": "https://example.com/hooks-schema.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "id": "cpp-format",
+        "description": "Format C++ files with clang-format",
+        "matcher": "Write|Edit",
+        "filePattern": "**/*.{cpp,hpp,h,cc}",
+        "command": "clang-format -i $FILE_PATH",
+        "continueOnError": true,
+        "enabled": true,
+        "reason": "Maintain consistent C++ code style"
+      },
+      {
+        "id": "cpp-lint",
+        "description": "Lint C++ files with cppcheck",
+        "matcher": "Write|Edit",
+        "filePattern": "**/*.{cpp,hpp,h,cc}",
+        "command": "cppcheck --enable=all --suppress=missingIncludeSystem $FILE_PATH",
+        "continueOnError": true,
+        "enabled": true,
+        "reason": "Catch common C++ errors early"
+      },
+      {
+        "id": "cmake-validate",
+        "description": "Validate CMakeLists.txt syntax",
+        "matcher": "Write|Edit",
+        "filePattern": "**/CMakeLists.txt",
+        "command": "cmake --help-command-list > /dev/null && echo 'CMake OK'",
+        "continueOnError": true,
+        "enabled": false,
+        "reason": "Note: Full validation requires running cmake (heavy operation)"
+      },
+      {
+        "id": "qt-ui-check",
+        "description": "Check Qt UI patterns & const correctness",
+        "matcher": "Write|Edit",
+        "filePattern": "src/**/*.{cpp,h}",
+        "command": "grep -n 'new Q' $FILE_PATH | head -5 || echo 'No Qt allocs detected'",
+        "continueOnError": true,
+        "enabled": true,
+        "reason": "Alert on potential Q_OBJECT hierarchy issues"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "id": "check-file-size",
+        "description": "Warn if file will exceed 800 lines (ECC Standard)",
+        "matcher": "Write",
+        "filePattern": "**/*.{cpp,hpp,h}",
+        "command": "node -e \"let d=''; process.stdin.on('data', c => d += c); process.stdin.on('end', () => { const lines = d.split('\\\\n').length; if (lines > 800) { console.error('[WARN] File will be ' + lines + ' lines (target: <800)'); process.exit(1); } else { console.log(d); }})\"",
+        "continueOnError": false,
+        "enabled": true,
+        "reason": "Enforce single-responsibility & maintainability"
+      }
+    ],
+    "Stop": [
+      {
+        "id": "final-build-check",
+        "description": "Verify project builds cleanly at session end",
+        "command": "cmake --build ./build --target all 2>&1 | tail -20",
+        "continueOnError": true,
+        "enabled": false,
+        "reason": "Requires active CMake build directory (optional)"
+      },
+      {
+        "id": "final-test",
+        "description": "Run unit tests at session end",
+        "command": "ctest --output-on-failure 2>&1 | tail -30",
+        "continueOnError": true,
+        "enabled": false,
+        "reason": "Requires CTest configured (optional)"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0",
+    "project": "github-copilot-demo",
+    "description": "Automation hooks for C++ + Qt project standards enforcement",
+    "ecc-integration": "Hooks are invoked by ECC pre/post tool-use and session-end events",
+    "manual-trigger": "User can manually run: `hookify run hook-id` to test individual hooks"
+  },
+  "notes": [
+    {
+      "topic": "Disabled Hooks (requires external setup)",
+      "items": [
+        "cmake-validate: Requires cmake binary + project configuration",
+        "final-build-check: Requires cmake build directory ./build",
+        "final-test: Requires CTest configuration in CMakeLists.txt"
+      ]
+    },
+    {
+      "topic": "Enable Instructions",
+      "items": [
+        "Install clang-format: `apt install clang-format` (Linux) or `brew install clang-format` (macOS)",
+        "Install cppcheck: `apt install cppcheck` or `brew install cppcheck`",
+        "Set `enabled: true` for disabled hooks after installing dependencies"
+      ]
+    },
+    {
+      "topic": "Custom Hook Example",
+      "items": [
+        "Add new hook in PostToolUse array with unique id",
+        "Set matcher: Write (new files) or Edit (modifications)",
+        "Use filePattern glob: `src/**/*.cpp` matches src/ recursively",
+        "Command runs with $FILE_PATH variable substituted"
+      ]
+    }
+  ]
+}
